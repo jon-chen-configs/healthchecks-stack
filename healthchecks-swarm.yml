@@ -21,8 +21,6 @@ services:
         - traefik.http.routers.healthcheck.entrypoints=https
         - traefik.http.routers.healthcheck.middlewares=internal-whitelist
         - traefik.http.services.healthcheck.loadbalancer.server.port=8000
-    environment:
-      - DEFAULT_FROM_EMAIL=${SMTP_FROM}
     volumes:
       - healthchecks_config:/config
     networks:
