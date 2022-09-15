@@ -22,7 +22,7 @@ services:
         - traefik.http.routers.healthcheck.middlewares=internal-whitelist
         - traefik.http.services.healthcheck.loadbalancer.server.port=8000
     volumes:
-      - healthchecks_config:/config
+      - healthchecks_data:/config
     networks:
       - default
       - traefik-net
@@ -42,13 +42,53 @@ services:
     networks:
       - default
 
+  healthchecks-backup-db-job:
+    image: efrecon/sqlite-backup:latest
+    user: "0:0"
+    deploy:
+      mode: replicated
+      replicas: 0
+      placement:
+        constraints: [node.platform.arch != aarch64]
+      restart_policy:
+        condition: none
+      labels:
+        - swarm.cronjob.enable=true
+        - swarm.cronjob.schedule=@daily
+    networks:
+      - default
+    # https://hub.docker.com/r/efrecon/sqlite-backup
+    entrypoint: >-
+      sh -c 'LOG=/logs/healthchecks-backup-db-job.log;
+      date > $$LOG &&
+      wget -SO - http://tasks.healthchecks:8000/ping/ec476fc6-6567-4019-99a7-d10f7faed654/start >> $$LOG 2>&1 &&
+      echo backing up db... >> $$LOG &&
+      /usr/local/bin/backup.sh -f /data/hc.sqlite -k 2 -d /backups/data/sqlite -n "healthchecks_backup_%Y%m%d-%H%M%S.sql.gz" >> $$LOG &&
+      echo done. >> $$LOG &&
+      wget -SO - http://tasks.healthchecks:8000/ping/ec476fc6-6567-4019-99a7-d10f7faed654 >> $$LOG 2>&1'
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - healthchecks_data:/data
+      - healthchecks-stack_logs:/logs
+      - backups:/backups
+
 
 volumes:
-  healthchecks_config:
+  healthchecks_data:
     driver_opts:
       type: nfs
       o: addr=${NAS_HOST},nolock,noresvport,vers=2
       device: :${DATADIR}/healthchecks-stack/healthchecks
+  healthchecks-stack_logs:
+    driver_opts:
+      type: nfs
+      o: addr=${NAS_HOST},nolock,noresvport,vers=2
+      device: :${DATADIR}/healthchecks-stack/logs
+  backups:
+    driver_opts:
+      type: nfs
+      o: addr=${NAS_HOST},nolock,noresvport,vers=2
+      device: :/volume1/docker/backups
 
 
 networks:
