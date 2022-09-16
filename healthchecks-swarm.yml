@@ -22,6 +22,7 @@ services:
         - traefik.http.routers.healthcheck.middlewares=internal-whitelist
         - traefik.http.services.healthcheck.loadbalancer.server.port=8000
     volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
       - healthchecks_data:/config
     networks:
       - default
@@ -39,6 +40,8 @@ services:
         constraints:
           - node.platform.arch != aarch64
           - node.hostname != ${NAS_HOSTNAME}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - default
 
