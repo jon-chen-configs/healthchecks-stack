@@ -25,7 +25,7 @@ services:
         - homepage.group=Network
         - homepage.icon=https://raw.githubusercontent.com/modem7/MiscAssets/master/Icons/Dashboard-Icons/healthchecks.png
         - homepage.href=https://healthchecks.cynicsoft.net/
-        - homepage.description=Cron Job Monitoring
+        - homepage.description=Cron job monitoring
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - healthchecks_data:/config
