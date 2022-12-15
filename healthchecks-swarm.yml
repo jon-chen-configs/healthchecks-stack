@@ -70,8 +70,9 @@ services:
       sh -c 'LOG=/logs/healthchecks-backup-db-job.log;
       date 2>&1 | tee $$LOG;
       wget -SO - http://tasks.healthchecks:8000/ping/ec476fc6-6567-4019-99a7-d10f7faed654/start 2>&1 | tee -a $$LOG;
-      echo "backing up db..." 2>&1 | tee -a $$LOG;
-      /usr/local/bin/backup.sh -f /data/hc.sqlite -k 2 -d /backups/data/sqlite -n "healthchecks_backup_%Y%m%d-%H%M%S.sql.gz" 2>&1 | tee -a $$LOG;
+      echo "backing up db..." 2>&1 | tee -a $$LOG &&
+      /usr/local/bin/backup.sh -f /data/hc.sqlite -k 2 -d /backups/data/sqlite -n "healthchecks_backup_%Y%m%d-%H%M%S.sql.gz" 2>&1 | tee -a $$LOG &&
+      echo "done.";
       wget -SO - http://tasks.healthchecks:8000/ping/ec476fc6-6567-4019-99a7-d10f7faed654/$$? 2>&1 | tee -a $$LOG'
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
