@@ -68,6 +68,7 @@ services:
     # https://hub.docker.com/r/efrecon/sqlite-backup
     entrypoint: >-
       sh -c 'LOG=/logs/healthchecks-backup-db-job.log;
+      set -o pipefail;
       date 2>&1 | tee $$LOG;
       wget -SO - http://tasks.healthchecks:8000/ping/ec476fc6-6567-4019-99a7-d10f7faed654/start 2>&1 | tee -a $$LOG;
       echo "backing up db..." 2>&1 | tee -a $$LOG &&
