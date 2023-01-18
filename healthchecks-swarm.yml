@@ -19,13 +19,16 @@ services:
         - traefik.docker.network=traefik-net
         - traefik.http.routers.healthcheck.rule=Host(`healthchecks.cynicsoft.net`)
         - traefik.http.routers.healthcheck.entrypoints=https
-        - traefik.http.routers.healthcheck.middlewares=internal-whitelist
+        - traefik.http.routers.healthcheck.middlewares=internal-whitelist,traefik-forward-auth
         - traefik.http.services.healthcheck.loadbalancer.server.port=8000
         - homepage.name=Healthchecks
         - homepage.group=Network
         - homepage.icon=https://raw.githubusercontent.com/modem7/MiscAssets/master/Icons/Dashboard-Icons/healthchecks.png
         - homepage.href=https://healthchecks.cynicsoft.net/
         - homepage.description=Cron job monitoring
+    environment:
+      - REMOTE_USER_HEADER=HTTP_X_FORWARDED_USER
+      - REGISTRATION_OPEN=False
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - healthchecks_data:/config
